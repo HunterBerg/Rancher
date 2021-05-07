@@ -1,23 +1,19 @@
   
 import asyncio
 import discord
-<<<<<<< HEAD
+import os
+from dotenv import load_dotenv
 import youtube_dl
 from discord.ext import commands
+import ffmpeg
 
-
-
+load_dotenv()
+BOT_TOKEN = os.getenv("TESTKEY")
 #Basic Bot commands
 #-------------------------------------------------------------------------------------------------------------------------------------
 
 
-Bot = commands.Bot(command_prefix = '*') #prefix for the bot
-=======
-from discord.ext import commands
-import ffmpeg
-
 Bot = commands.Bot(command_prefix = '*')
->>>>>>> parent of fdfa3d7 (added ffmpeg and other commands (Error line 90) FIX ASAP)
 
  
 @Bot.command() # *ping command
@@ -43,11 +39,9 @@ async def on_ready():
      await Bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="Music"))
      print('Rancher is Online')
 
-<<<<<<< HEAD
 
     #------------------------------------------------------------------------------------------------------------
     #FFMPEG Setup
-=======
     
 
 
@@ -65,7 +59,6 @@ async def on_ready():
 
 
 
->>>>>>> parent of fdfa3d7 (added ffmpeg and other commands (Error line 90) FIX ASAP)
 
 
 
@@ -73,7 +66,5 @@ async def on_ready():
 
 
 
-
-
-
-Bot.run("ODMzMDYyMjA3Mjg5MTYzNzc2.YHs3ow.-1IYYmpprBxJKSerZRXj_8ZDlgc") 
+print(BOT_TOKEN)
+# Bot.run("ODMzMDYyMjA3Mjg5MTYzNzc2.YHs3ow.-1IYYmpprBxJKSerZRXj_8ZDlgc") 
