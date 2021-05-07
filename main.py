@@ -1,9 +1,8 @@
   
+import asyncio
 import discord
-from discord.ext import commands
 import youtube_dl
-from discord.voice_client import VoiceClient
-import ffmpeg 
+from discord.ext import commands
 
 
 #Basic Bot commands
@@ -40,7 +39,6 @@ async def on_ready():
     #------------------------------------------------------------------------------------------------------------
     #FFMPEG Setup
 
-    
 
 
 
@@ -71,4 +69,5 @@ async def on_ready():
 
 
 
-Bot.run("ODMzMDYyMjA3Mjg5MTYzNzc2.YHs3ow.TazwaKtlQPhhT4JtMVzlGITCI2c") 
+
+Bot.run("ODMzMDYyMjA3Mjg5MTYzNzc2.YHs3ow.WizIrv3SZdBL3n9EcPngQGu3Ue8") 
