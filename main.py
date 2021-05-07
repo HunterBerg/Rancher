@@ -40,4 +40,4 @@ async def ping(ctx):
 
 
 
-Bot.run("ODMzMDYyMjA3Mjg5MTYzNzc2.YHs3ow.Wqo1fu2SRAxUh2EdEnY_L6UTAlc") 
+Bot.run("ODMzMDYyMjA3Mjg5MTYzNzc2.YHs3ow.CsvgK6-MuGRaiF8FTcTjelQlgPs") 
