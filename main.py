@@ -1,6 +1,7 @@
   
 import asyncio
 import discord
+<<<<<<< HEAD
 import youtube_dl
 from discord.ext import commands
 
@@ -11,6 +12,12 @@ from discord.ext import commands
 
 
 Bot = commands.Bot(command_prefix = '*') #prefix for the bot
+=======
+from discord.ext import commands
+import ffmpeg
+
+Bot = commands.Bot(command_prefix = '*')
+>>>>>>> parent of fdfa3d7 (added ffmpeg and other commands (Error line 90) FIX ASAP)
 
  
 @Bot.command() # *ping command
@@ -36,9 +43,29 @@ async def on_ready():
      await Bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="Music"))
      print('Rancher is Online')
 
+<<<<<<< HEAD
 
     #------------------------------------------------------------------------------------------------------------
     #FFMPEG Setup
+=======
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+>>>>>>> parent of fdfa3d7 (added ffmpeg and other commands (Error line 90) FIX ASAP)
 
 
 
