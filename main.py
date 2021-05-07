@@ -5,6 +5,7 @@ import youtube_dl
 from discord.ext import commands
 
 
+
 #Basic Bot commands
 #-------------------------------------------------------------------------------------------------------------------------------------
 
@@ -48,26 +49,4 @@ async def on_ready():
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Bot.run("ODMzMDYyMjA3Mjg5MTYzNzc2.YHs3ow.WizIrv3SZdBL3n9EcPngQGu3Ue8") 
+Bot.run("ODMzMDYyMjA3Mjg5MTYzNzc2.YHs3ow.-1IYYmpprBxJKSerZRXj_8ZDlgc") 
