@@ -24,7 +24,7 @@ async def speak(ctx, *, text):
           message = ctx.message 
           await message.delete()
 
-          await ctx.send(message.content)
+          await ctx.send(text)
      else:
           await ctx.send("this is not a command you can use")
 
