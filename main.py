@@ -1,4 +1,7 @@
-  
+  #To do list:
+	#add queue System
+	#now playing feature
+	
 import asyncio
 import discord
 import os
