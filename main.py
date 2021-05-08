@@ -2,13 +2,11 @@
 import asyncio
 import discord
 import os
-from dotenv import load_dotenv
 import youtube_dl
 from discord.ext import commands
 import ffmpeg
 
-load_dotenv()
-BOT_TOKEN = os.getenv("TESTKEY")
+BOT_TOKEN = os.environ['BOT_TOKEN']
 #Basic Bot commands
 #-------------------------------------------------------------------------------------------------------------------------------------
 
@@ -66,5 +64,4 @@ async def on_ready():
 
 
 
-print(BOT_TOKEN)
-# Bot.run("ODMzMDYyMjA3Mjg5MTYzNzc2.YHs3ow.-1IYYmpprBxJKSerZRXj_8ZDlgc") 
+Bot.run(BOT_TOKEN) 
