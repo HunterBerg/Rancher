@@ -1,6 +1,6 @@
   #To do list:
 	#add queue System
-	#now playing feature
+	#now playing feature (how far you are in the song)
 	
 import asyncio
 import discord
