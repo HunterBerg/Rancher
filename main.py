@@ -49,140 +49,129 @@ queue = []
 youtube_dl.utils.bug_reports_message = lambda: ''
 
 ytdl_format_options = {
-    'format': 'bestaudio/best',
-    'outtmpl': '%(extractor)s-%(id)s-%(title)s.%(ext)s',
-    'restrictfilenames': True,
-    'noplaylist': True,
-    'nocheckcertificate': True,
-    'ignoreerrors': False,
-    'logtostderr': False,
-    'quiet': True,
-    'no_warnings': True,
-    'default_search': 'auto',
-    'source_address': '0.0.0.0'
+	'format': 'bestaudio/best',
+	'outtmpl': '%(extractor)s-%(id)s-%(title)s.%(ext)s',
+	'restrictfilenames': True,
+	'noplaylist': True,
+	'nocheckcertificate': True,
+	'ignoreerrors': False,
+	'logtostderr': False,
+	'quiet': True,
+	'no_warnings': True,
+	'default_search': 'auto',
+	'source_address': '0.0.0.0'
 }
 
 ffmpeg_options = {
-    'options': '-vn'
+	'options': '-vn'
 }
 
 ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
 
 class YTDLSource(discord.PCMVolumeTransformer):
-    def __init__(self, source, *, data, volume=0.5):
-        super().__init__(source, volume)
+	def __init__(self, source, *, data, volume=0.5):
+		super().__init__(source, volume)
 
-        self.data = data
+		self.data = data
 
-        self.title = data.get('title')
-        self.url = data.get('url')
+		self.title = data.get('title')
+		self.url = data.get('url')
 
-    @classmethod
-    async def from_url(cls, url, *, loop=None, stream=False, play=False):
-        loop = loop or asyncio.get_event_loop()
-        data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=not stream or play))
+	@classmethod
+	async def from_url(cls, url, *, loop=None, stream=False, play=False):
+		loop = loop or asyncio.get_event_loop()
+		data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=not stream or play))
 
-        if 'entries' in data:
-            data = data['entries'][0]
+		if 'entries' in data:
+			data = data['entries'][0]
 
-        filename = data['url'] if stream else ytdl.prepare_filename(data)
-        return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
+		filename = data['url'] if stream else ytdl.prepare_filename(data)
+		return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
 
 
 class Music(commands.Cog):
 	def __init__(self, bot):
-			self.bot = bot
+		self.bot = bot
 
 @commands.command()
 async def join(self, ctx,*,channel: discord.VoiceChannel):
 	if not ctx.message.author.voice:
-			await ctx.send("You are not connected to a voice channel!")
-			return
+		await ctx.send("You are not connected to a voice channel!")
+		return
 	else:
-			channel = ctx.message.author.voice.channel
-			await ctx.send(f'Connected to ``{channel}``')
+		channel = ctx.message.author.voice.channel
+		await ctx.send(f'Connected to ``{channel}``')
 
 	await channel.connect()
 
 @commands.command()
 async def play(self, ctx, *, url):
-
 	try:
-
 		async with ctx.typing():
-				player = await YTDLSource.from_url(url, loop=self.bot.loop, stream=True)
-				ctx.voice_client.play(player, after=lambda e: print('Player error: %s' % e) if e else None)
+			player = await YTDLSource.from_url(url, loop=self.bot.loop, stream=True)
+			ctx.voice_client.play(player, after=lambda e: print('Player error: %s' % e) if e else None)
 
 		await ctx.send(f':mag_right: **Searching for** ``' + url + '``\n<:youtube:763374159567781890> **Now Playing:** ``{}'.format(player.title) + "``")
 
 	except:
-
 		await ctx.send("Somenthing went wrong - please try again later!")
 
 @commands.command()
 async def play_queue(self, ctx):
-
 	for url in queue:
-
 		try:
-
 			async with ctx.typing():
-					player = await YTDLSource.from_url(url, loop=self.bot.loop, stream=True)
-					ctx.voice_client.play(player, after=lambda e: print('Player error: %s' % e) if e else None)
+				player = await YTDLSource.from_url(url, loop=self.bot.loop, stream=True)
+				ctx.voice_client.play(player, after=lambda e: print('Player error: %s' % e) if e else None)
 
 			await ctx.send(f'<:youtube:763374159567781890> **Now Playing:** ``{url}``')
 
 		except:
-
 			await ctx.send("Somenthing went wrong - please try again later!")
 	
 	else:
-
 		await ctx.send("Queue is now done!")
 
 @commands.command()
 async def pause(self, ctx):
 	voice = get(self.bot.voice_clients, guild=ctx.guild)
+	voice.pause()
 
-voice.pause()
-
-user = ctx.message.author.mention
-await ctx.send(f"Bot was paused by {user}")
+	user = ctx.message.author.mention
+	await ctx.send(f"Bot was paused by {user}")
 
 @commands.command()
 async def resume(self, ctx):
 	voice = get(self.bot.voice_clients, guild=ctx.guild)
 
-voice.resume()
+	voice.resume()
 
-user = ctx.message.author.mention
-await ctx.send(f"Bot was resumed by {user}")
+	user = ctx.message.author.mention
+	await ctx.send(f"Bot was resumed by {user}")
 
 @commands.command()
 async def add_queue(self, ctx, url):
-
 	global queue
 
-try:
-	queue.append(url)
-	user = ctx.message.author.mention
-	await ctx.send(f'``{url}`` was added to the queue by {user}!')
-except:
-	await ctx.send(f"Couldnt add {url} to the queue!")
+	try:
+		queue.append(url)
+		user = ctx.message.author.mention
+		await ctx.send(f'``{url}`` was added to the queue by {user}!')
+	except:
+		await ctx.send(f"Couldnt add {url} to the queue!")
 
 @commands.command()
 async def remove_queue(self, ctx, number):
-
 	global queue
 
-try:
+	try:
 		del(queue[int(number)])
 		if len(queue) < 1:
-				await ctx.send("Your queue is empty now!")
+			await ctx.send("Your queue is empty now!")
 		else:
-				await ctx.send(f'Your queue is now {queue}')
-except:
-			await ctx.send("List index out of range - the queue starts at 0")
+			await ctx.send(f'Your queue is now {queue}')
+	except:
+		await ctx.send("List index out of range - the queue starts at 0")
 
 @commands.command()
 async def clear_queue(self, ctx):
@@ -220,9 +209,9 @@ async def ensure_voice(self, ctx):
 			ctx.voice_client.stop()
 
 def setup(client):
-    client.add_cog(Music(client))
+	client.add_cog(Music(client))
 
 
 
 
-Bot.run(BOT_TOKEN) 
+Bot.run(BOT_TOKEN)
