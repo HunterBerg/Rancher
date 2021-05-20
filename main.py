@@ -68,7 +68,7 @@ ffmpeg_options = {
 
 ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
 
-class YTDLSource(discord.PCMVolumeTransformer):
+	class YTDLSource(discord.PCMVolumeTransformer):
 	def __init__(self, source, *, data, volume=0.5):
 		super().__init__(source, volume)
 
@@ -89,9 +89,9 @@ class YTDLSource(discord.PCMVolumeTransformer):
 		return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
 
 
-class Music(commands.Cog):
-	def __init__(self, bot):
-		self.bot = bot
+	class Music(commands.Cog):
+		def __init__(self, bot):
+			self.bot = bot
 
 	@commands.command()
 	async def join(self, ctx,*,channel: discord.VoiceChannel):
@@ -118,102 +118,118 @@ class Music(commands.Cog):
 
 	@commands.command()
 	async def play_queue(self, ctx):
-		for url in queue:
-			try:
-				async with ctx.typing():
-					player = await YTDLSource.from_url(url, loop=self.bot.loop, stream=True)
-					ctx.voice_client.play(player, after=lambda e: print('Player error: %s' % e) if e else None)
+		try:
+			async with ctx.typing():
+				player = await YTDLSource.from_url(url, loop=self.bot.loop, stream=True)
+				ctx.voice_client.play(player, after=lambda e: print('Player error: %s' % e) if e else None)
 
-				await ctx.send(f'**Now Playing:** ``{url}``')
+			await ctx.send(f':mag_right: **Searching for** ``' + url + '``\n<:youtube:763374159567781890> **Now Playing:** ``{}'.format(player.title) + "``")
+			for url in queue:
+				try:
+					async with ctx.typing():
+						player = await YTDLSource.from_url(url, loop=self.bot.loop, stream=True)
+						ctx.voice_client.play(player, after=lambda e: print('Player error: %s' % e) if e else None)
 
-			except:
-				await ctx.send("Somenthing went wrong - please try again later!")
+					await ctx.send(f'**Now Playing:** ``{url}``')
+
+				except:
+						await ctx.send("Somenthing went wrong - please try again later!")
 		
-		else:
-			await ctx.send("Queue is now done!")
+			else:
+				await ctx.send("Queue is now done!")
 
-	@commands.command()
-	async def pause(self, ctx):
-		voice = get(self.bot.voice_clients, guild=ctx.guild)
-		voice.pause()
+			@commands.command()
+			async def pause(self, ctx):
+				voice = get(self.bot.voice_clients, guild=ctx.guild)
+				voice.pause()
 
-		user = ctx.message.author.mention
-		await ctx.send(f"Bot was paused by {user}")
-
-	@commands.command()
-	async def resume(self, ctx):
-		voice = get(self.bot.voice_clients, guild=ctx.guild)
-
-		voice.resume()
-
-		user = ctx.message.author.mention
-		await ctx.send(f"Bot was resumed by {user}")
-
-	@commands.command()
-	async def add_queue(self, ctx, *, url):
-		global queue
-
-		try:
-			queue.append(url)
 			user = ctx.message.author.mention
-			await ctx.send(f'``{url}`` was added to the queue by {user}!')
-		except:
-			await ctx.send(f"Couldnt add {url} to the queue!")
+			await ctx.send(f"Bot was paused by {user}")
 
-	@commands.command()
-	async def remove_queue(self, ctx, number):
-		global queue
+			@commands.command()
+			async def resume(self, ctx):
+				voice = get(self.bot.voice_clients, guild=ctx.guild)
 
-		try:
-			del(queue[int(number)])
-			if len(queue) < 1:
-				await ctx.send("Your queue is empty now!")
-			else:
-				await ctx.send(f'Your queue is now {queue}')
-		except:
-			await ctx.send("List index out of range - the queue starts at 0")
+				voice.resume()
 
-	@commands.command()
-	async def clear_queue(self, ctx):
+				user = ctx.message.author.mention
+				await ctx.send(f"Bot was resumed by {user}")
 
-		global queue
+			@commands.command()
+			async def add(self, ctx, *, url):
+				global queue
 
-		queue.clear()
-		user = ctx.message.author.mention
-		await ctx.send(f"The queue was cleared by {user}")
+				try:
+					queue.append(url)
+					user = ctx.message.author.mention
+					await ctx.send(f'``{url}`` was added to the queue by {user}!')
+				except:
+					await ctx.send(f"Couldnt add {url} to the queue!")
 
-	@commands.command()
-	async def view_queue(self, ctx):
+			@commands.command()
+			async def remove(self, ctx, number):
+				global queue
 
-		if len(queue) < 1:
-			await ctx.send("The queue is empty - nothing to see here!")
-		else:
-			await ctx.send(f'Your queue is now {queue}')
+				try:
+					del(queue[int(number)])
+					if len(queue) < 1:
+						await ctx.send("Your queue is empty now!")
+					else:
+						await ctx.send(f'Your queue is now {queue}')
+				except:
+					await ctx.send("List index out of range - the queue starts at 0")
 
-	@commands.command()
-	async def leave(self, ctx):
-		voice_client = ctx.message.guild.voice_client
-		user = ctx.message.author.mention
-		await voice_client.disconnect()
-		await ctx.send(f'Disconnected from {user}')
+			@commands.command()
+			async def clear(self, ctx):
 
-	@play_queue.before_invoke
-	@play.before_invoke
-	async def ensure_voice(self, ctx):
-		if ctx.voice_client is None:
-			if ctx.author.voice:
-				await ctx.author.voice.channel.connect()
-			else:
-				await ctx.send("You are not connected to a voice channel.")
+				global queue
+
+				queue.clear()
+				user = ctx.message.author.mention
+				await ctx.send(f"The queue was cleared by {user}")
+
+			@commands.command()
+			async def view_queue(self, ctx):
+
+				if len(queue) < 1:
+					await ctx.send("The queue is empty - nothing to see here!")
+				else:
+					await ctx.send(f'Your queue is now {queue}')
+
+			@commands.command()
+			async def leave(self, ctx):
+				voice_client = ctx.message.guild.voice_client
+				user = ctx.message.author.mention
+				await voice_client.disconnect()
+				await ctx.send(f'Disconnected from {user}')
+
+			@play_queue.before_invoke
+			@play.before_invoke
+			async def ensure_voice(self, ctx):
+				if ctx.voice_client is None:
+					if ctx.author.voice:
+						await ctx.author.voice.channel.connect()
+				else:
+					await ctx.send("You are not connected to a voice channel.")
 		elif ctx.voice_client.is_playing():
-				ctx.voice_client.stop()
+			ctx.voice_client.stop()
 
-@command.commands():
+			@commands.command(pass_context=True)
+			async def skip(ctx):
+				voice_client.stop()
+			voice_client.skip()
+			try:
+				os.remove("song.mp3")	
+			except:
+				pass
+			play_next(ctx)
 
 
-Bot.add_cog(Music(Bot))
+
+
+			Bot.add_cog(Music(Bot))
 
 
 
 
-Bot.run(BOT_TOKEN)
+		Bot.run(BOT_TOKEN)
