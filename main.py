@@ -44,11 +44,11 @@ async def on_ready():
 #youtube_dl 
 
 
-queue = []
+	queue = []
 
-youtube_dl.utils.bug_reports_message = lambda: ''
+	youtube_dl.utils.bug_reports_message = lambda: ''
 
-ytdl_format_options = {
+	ytdl_format_options = {
 	'format': 'bestaudio/best',
 	'outtmpl': '%(extractor)s-%(id)s-%(title)s.%(ext)s',
 	'restrictfilenames': True,
@@ -60,15 +60,15 @@ ytdl_format_options = {
 	'no_warnings': True,
 	'default_search': 'auto',
 	'source_address': '0.0.0.0'
-}
+	}
 
-ffmpeg_options = {
+	ffmpeg_options = {
 	'options': '-vn'
-}
+	}
 
-ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
+	ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
 
-	class YTDLSource(discord.PCMVolumeTransformer):
+class YTDLSource(discord.PCMVolumeTransformer):
 	def __init__(self, source, *, data, volume=0.5):
 		super().__init__(source, volume)
 
@@ -109,7 +109,7 @@ ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
 		try:
 			async with ctx.typing():
 				player = await YTDLSource.from_url(url, loop=self.bot.loop, stream=True)
-				ctx.voice_client.play(player, after=lambda e: print('Player error: %s' % e) if e else None)
+			ctx.voice_client.play(player, after=lambda e: print('Player error: %s' % e) if e else None)
 
 			await ctx.send(f':mag_right: **Searching for** ``' + url + '``\n<:youtube:763374159567781890> **Now Playing:** ``{}'.format(player.title) + "``")
 
@@ -121,27 +121,27 @@ ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
 		try:
 			async with ctx.typing():
 				player = await YTDLSource.from_url(url, loop=self.bot.loop, stream=True)
-				ctx.voice_client.play(player, after=lambda e: print('Player error: %s' % e) if e else None)
+			ctx.voice_client.play(player, after=lambda e: print('Player error: %s' % e) if e else None)
 
 			await ctx.send(f':mag_right: **Searching for** ``' + url + '``\n<:youtube:763374159567781890> **Now Playing:** ``{}'.format(player.title) + "``")
 			for url in queue:
 				try:
 					async with ctx.typing():
 						player = await YTDLSource.from_url(url, loop=self.bot.loop, stream=True)
-						ctx.voice_client.play(player, after=lambda e: print('Player error: %s' % e) if e else None)
+					ctx.voice_client.play(player, after=lambda e: print('Player error: %s' % e) if e else None)
 
 					await ctx.send(f'**Now Playing:** ``{url}``')
 
 				except:
-						await ctx.send("Somenthing went wrong - please try again later!")
-		
+					await ctx.send("Somenthing went wrong - please try again later!")
+
 			else:
 				await ctx.send("Queue is now done!")
 
 			@commands.command()
 			async def pause(self, ctx):
 				voice = get(self.bot.voice_clients, guild=ctx.guild)
-				voice.pause()
+			voice.pause()
 
 			user = ctx.message.author.mention
 			await ctx.send(f"Bot was paused by {user}")
@@ -150,43 +150,43 @@ ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
 			async def resume(self, ctx):
 				voice = get(self.bot.voice_clients, guild=ctx.guild)
 
-				voice.resume()
+			voice.resume()
 
-				user = ctx.message.author.mention
-				await ctx.send(f"Bot was resumed by {user}")
+			user = ctx.message.author.mention
+			await ctx.send(f"Bot was resumed by {user}")
 
 			@commands.command()
 			async def add(self, ctx, *, url):
 				global queue
 
-				try:
-					queue.append(url)
-					user = ctx.message.author.mention
-					await ctx.send(f'``{url}`` was added to the queue by {user}!')
-				except:
-					await ctx.send(f"Couldnt add {url} to the queue!")
+			try:
+				queue.append(url)
+				user = ctx.message.author.mention
+				await ctx.send(f'``{url}`` was added to the queue by {user}!')
+			except:
+				await ctx.send(f"Couldnt add {url} to the queue!")
 
 			@commands.command()
 			async def remove(self, ctx, number):
 				global queue
 
-				try:
-					del(queue[int(number)])
-					if len(queue) < 1:
-						await ctx.send("Your queue is empty now!")
-					else:
-						await ctx.send(f'Your queue is now {queue}')
-				except:
-					await ctx.send("List index out of range - the queue starts at 0")
+			try:
+				del(queue[int(number)])
+				if len(queue) < 1:
+					await ctx.send("Your queue is empty now!")
+				else:
+					await ctx.send(f'Your queue is now {queue}')
+			except:
+				await ctx.send("List index out of range - the queue starts at 0")
 
 			@commands.command()
 			async def clear(self, ctx):
 
 				global queue
 
-				queue.clear()
-				user = ctx.message.author.mention
-				await ctx.send(f"The queue was cleared by {user}")
+			queue.clear()
+			user = ctx.message.author.mention
+			await ctx.send(f"The queue was cleared by {user}")
 
 			@commands.command()
 			async def view_queue(self, ctx):
@@ -195,24 +195,6 @@ ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
 					await ctx.send("The queue is empty - nothing to see here!")
 				else:
 					await ctx.send(f'Your queue is now {queue}')
-
-			@commands.command()
-			async def leave(self, ctx):
-				voice_client = ctx.message.guild.voice_client
-				user = ctx.message.author.mention
-				await voice_client.disconnect()
-				await ctx.send(f'Disconnected from {user}')
-
-			@play_queue.before_invoke
-			@play.before_invoke
-			async def ensure_voice(self, ctx):
-				if ctx.voice_client is None:
-					if ctx.author.voice:
-						await ctx.author.voice.channel.connect()
-				else:
-					await ctx.send("You are not connected to a voice channel.")
-		elif ctx.voice_client.is_playing():
-			ctx.voice_client.stop()
 
 			@commands.command(pass_context=True)
 			async def skip(ctx):
@@ -232,4 +214,4 @@ ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
 
 
 
-		Bot.run(BOT_TOKEN)
+			Bot.run(BOT_TOKEN)
