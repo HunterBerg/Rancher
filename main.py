@@ -7,7 +7,9 @@ from discord.ext import commands
 
 
 BOT_TOKEN = os.environ['BOT_TOKEN']
- 
+
+songs = asyncio.Queue()
+play_next_song = asyncio.Event()
 
 
 #youtube_dl 
@@ -93,6 +95,32 @@ class Music(commands.Cog):
 
 Bot = commands.Bot(command_prefix=commands.when_mentioned_or("*"),
                    description='Relatively simple music bot example')
+
+
+
+async def audio_player_task():
+    while True:
+        play_next_song.clear()
+        current = await songs.get()
+        current.start()
+        await play_next_song.wait()
+
+
+def toggle_next():
+    Bot.loop.call_soon_threadsafe(play_next_song.set)
+
+
+@Bot.command(pass_context=True)
+async def play(ctx, url):
+    if not Bot.is_voice_connected(ctx.message.server):
+        voice = await Bot.join_voice_channel(ctx.message.author.voice_channel)
+    else:
+        voice = Bot.voice_client_in(ctx.message.server)
+
+    player = await voice.create_ytdl_player(url, after=toggle_next)
+    await songs.put(player)
+
+Bot.loop.create_task(audio_player_task())
 
 
 	
