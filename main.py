@@ -6,8 +6,9 @@ import youtube_dl
 from discord.ext import commands
 from discord.utils import get
 
-BOT_TOKEN = os.environ['BOT_TOKEN']
 
+BOT_TOKEN = os.environ['BOT_TOKEN']
+ 
 
 
 #Basic Bot commands
