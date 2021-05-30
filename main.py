@@ -7,11 +7,16 @@ from discord.ext import commands
 
 
 BOT_TOKEN = os.environ['BOT_TOKEN']
-
-songs = asyncio.Queue()
-play_next_song = asyncio.Event()
+ 
 
 
+#Basic Bot commands
+#-------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+#------------------------------------------------------------------------------------------------------------
 #youtube_dl 
 
 # Suppress noise about console usage from errors
@@ -66,6 +71,16 @@ class Music(commands.Cog):
         self.bot = bot
 
     @commands.command()
+    async def join(self, ctx, *, channel: discord.VoiceChannel):
+        """Joins a voice channel"""
+
+        if ctx.voice_client is not None:
+            return await ctx.voice_client.move_to(channel)
+
+        await channel.connect()
+
+
+    @commands.command()
     async def play(self, ctx, *, url):
         """Streams from a url (same as yt, but doesn't predownload)"""
 
@@ -76,13 +91,23 @@ class Music(commands.Cog):
         await ctx.send(f'Now playing: {player.title}')
 
     @commands.command()
+    async def volume(self, ctx, volume: int):
+        """Changes the player's volume"""
+
+        if ctx.voice_client is None:
+            return await ctx.send("Not connected to a voice channel.")
+
+        ctx.voice_client.source.volume = volume / 100
+        await ctx.send(f"Changed volume to {volume}%")
+
+    @commands.command()
     async def stop(self, ctx):
         """Stops and disconnects the bot from voice"""
 
         await ctx.voice_client.disconnect()
 
     @play.before_invoke
-  
+    
     async def ensure_voice(self, ctx):
         if ctx.voice_client is None:
             if ctx.author.voice:
@@ -95,32 +120,6 @@ class Music(commands.Cog):
 
 Bot = commands.Bot(command_prefix=commands.when_mentioned_or("*"),
                    description='Relatively simple music bot example')
-
-
-
-async def audio_player_task():
-    while True:
-        play_next_song.clear()
-        current = await songs.get()
-        current.start()
-        await play_next_song.wait()
-
-
-def toggle_next():
-    Bot.loop.call_soon_threadsafe(play_next_song.set)
-
-
-@Bot.command(pass_context=True)
-async def play(ctx, url):
-    if not Bot.is_voice_connected(ctx.message.server):
-        voice = await Bot.join_voice_channel(ctx.message.author.voice_channel)
-    else:
-        voice = Bot.voice_client_in(ctx.message.server)
-
-    player = await voice.create_ytdl_player(url, after=toggle_next)
-    await songs.put(player)
-
-Bot.loop.create_task(audio_player_task())
 
 
 	
