@@ -1,8 +1,9 @@
+import configparser
+import token
 import discord
 import asyncio
-import os
-from dotenv import load_dotenv
-from os import getenv 
+import os 
+from configparser import ConfigParser
 import youtube_dl
 import urllib.parse, urllib.request, re
 import requests
@@ -10,12 +11,9 @@ from discord.ext import commands
 from discord import Embed, FFmpegPCMAudio
 from discord.utils import get
 
-
-load_dotenv()
-token = getenv("TOKEN")
-
- 
-
+config = ConfigParser()
+config.read('./bottoken.ini')
+BOT_TOKEN=config['BOT_TOKEN']['TOKEN']
 Bot = commands.Bot(
 	command_prefix=commands.when_mentioned_or("*"),
 	description='Relatively simple music bot example'
@@ -104,17 +102,17 @@ class Music(commands.Cog):
 		except:
 			await ctx.send("Somenthing went wrong - please try again later!")
 
-	# def start_playing(self, voice_client, player):
-	# 	self.queue[0] = player
+		# def start_playing(self, voice_client, player):
+		# 	self.queue[0] = player
 
-	# 	i = 0
-	# 	while i <  len(self.queue):
-	# 	try:
-	# 	voice_client.play(self.queue[i], after=lambda e: print('Player error: %s' % e) if e else None)
+		# 	i = 0
+		# 	while i <  len(self.queue):
+		# 		try:
+		# 			voice_client.play(self.queue[i], after=lambda e: print('Player error: %s' % e) if e else None)
 
-	# 	except:
-	# 	pass
-	# 	i += 1
+		# 		except:
+		# 			pass
+		# 		i += 1
 
 	@commands.command()
 	async def play_queue(self, ctx):
@@ -240,4 +238,4 @@ async def on_ready():
 
 
 Bot.add_cog(Music(Bot))
-Bot.run(token)
+Bot.run(BOT_TOKEN)
