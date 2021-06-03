@@ -1,16 +1,19 @@
 import discord
 import asyncio
 import os
+from dotenv import load_dotenv
+from os import getenv 
 import youtube_dl
-
 import urllib.parse, urllib.request, re
 import requests
-
 from discord.ext import commands
 from discord import Embed, FFmpegPCMAudio
 from discord.utils import get
 
-BOT_TOKEN = os.environ['BOT_TOKEN']
+
+load_dotenv()
+token = getenv("TOKEN")
+
  
 
 Bot = commands.Bot(
@@ -237,4 +240,4 @@ async def on_ready():
 
 
 Bot.add_cog(Music(Bot))
-Bot.run(BOT_TOKEN)
+Bot.run(token)
