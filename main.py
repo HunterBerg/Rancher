@@ -1,20 +1,13 @@
 import discord
 import asyncio
 import os
-from discord.ext.commands.core import command
 from dotenv import load_dotenv
-from os import getenv 
 import youtube_dl
-import ffmpeg
-import urllib.parse, urllib.request, re
-import requests
 from discord.ext import commands
-from discord import Embed, FFmpegPCMAudio
-from discord.utils import get
 
 
 load_dotenv()
-token = getenv("TOKEN")
+token = os.getenv("TOKEN")
 
  
 
