@@ -3,8 +3,13 @@ import asyncio
 import os
 from dotenv import load_dotenv
 import youtube_dl
+import math
+from discord.utils import get
 from discord.ext import commands
 
+
+queue = []
+queue_looping = False
 
 load_dotenv()
 token = os.getenv("TOKEN")
@@ -22,7 +27,7 @@ Bot = commands.Bot(
 
 # Suppress noise about console usage from errors
 
-queue = []
+
 
 # Suppress noise about console usage from errors
 youtube_dl.utils.bug_reports_message = lambda: ''
@@ -81,27 +86,123 @@ class Music(commands.Cog):
 
 		if ctx.voice_client is not None:
 			return await ctx.voice_client.move_to(channel)
-
+		else:
+			channel=ctx.message.author.voice.channel()
+			self.queue={}
 		await channel.connect()
 
+	
 
 
+
+	# @commands.command()
+	# async def play(self, ctx, *, url):
+
+	# 	try:
+
+	# 		async with ctx.typing():
+	# 			player = await YTDLSource.from_url(url, loop=self.bot.loop, stream=True)
+	# 			ctx.voice_client.play(player, after=lambda e: print('Player error: %s' % e) if e else None)
+
+	# 		await ctx.send(f':mag_right: **Searching for** ``' + url + '``\n<:youtube:763374159567781890> **Now Playing:** ``{}'.format(player.title) + "``")
+
+	# 	except:
+
+	# 		await ctx.send("Somenthing went wrong - please try again later!")
 
 	@commands.command()
 	async def play(self, ctx, *, url):
-		"""Streams from a url (same as yt, but doesn't predownload)"""
 
-		async with ctx.typing():
-			player = await YTDLSource.from_url(url, loop=self.bot.loop, stream=True)
-			ctx.voice_client.play(player, after=lambda e: print(f'Player error: {e}') if e else None)
+		global queue
+		global queue_looping
 
-		await ctx.send(f'Now playing: {player.title}')
+		try:
+			queue.append(url)
+			user = ctx.message.author.mention
+			await ctx.send(f'``{url}`` was added to the queue by {user}!')
+		except:
+			await ctx.send(f"Couldnt add {url} to the queue!")
+
+		if queue_looping:
+			return
+
+		queue_looping = True
+		for url in queue:
+
+			try:
+
+				async with ctx.typing():
+					player = await YTDLSource.from_url(url, loop=self.bot.loop, stream=True)
+					ctx.voice_client.play(player, after=lambda e: print('Player error: %s' % e) if e else None)
+
+				await ctx.send(f'<:youtube:763374159567781890> **Now Playing:** ``{url}``')
+
+			except:
+
+				await ctx.send("Somenthing went wrong - please try again later!")
+			
+		else:
+
+			await ctx.send("Queue is now done!")
+
+			queue_looping = False
+
+	@commands.command()
+	async def pause(self, ctx):
+		voice = get(self.bot.voice_clients, guild=ctx.guild)
+
+		voice.pause()
+
+		user = ctx.message.author.mention
+		await ctx.send(f"Bot was paused by {user}")
+
+	@commands.command()
+	async def resume(self, ctx):
+		voice = get(self.bot.voice_clients, guild=ctx.guild)
+
+		voice.resume()
+
+		user = ctx.message.author.mention
+		await ctx.send(f"Bot was resumed by {user}")
+
+	@commands.command()
+	async def add_queue(self, ctx, url):
+
+		global queue
+
+		try:
+			queue.append(url)
+			user = ctx.message.author.mention
+			await ctx.send(f'``{url}`` was added to the queue by {user}!')
+		except:
+			await ctx.send(f"Couldnt add {url} to the queue!")
+	@commands.command()
+	async def clear_queue(self, ctx):
+
+		global queue
+
+		queue.clear()
+		user = ctx.message.author.mention
+		await ctx.send(f"The queue was cleared by {user}")
+	
+	@commands.command()
+	async def view_queue(self, ctx):
+
+		if len(queue) < 1:
+			await ctx.send("The queue is empty - nothing to see here!")
+		else:
+			await ctx.send(f'Your queue is now {queue}')
+
 
 	@commands.command()
 	async def stop(self, ctx):
 		"""Stops and disconnects the bot from voice"""
+		if ctx.message.author.id == 355099018113843200:
 
-		await ctx.voice_client.disconnect()
+			await ctx.voice_client.disconnect()
+
+		else:
+			await ctx.send("this is not a command you can use")
 
 
 
@@ -120,7 +221,7 @@ class Music(commands.Cog):
 
 @Bot.command() # *ping command
 async def ping(ctx):
-	await ctx.send(f'Pong! `{Bot.latency * 1000}` ms')
+	await ctx.send(f'Pong! `{math.floor(Bot.latency * 1000)}` ms')
 
 @Bot.command() #speak command (*speak)
 async def speak(ctx, *, text):
