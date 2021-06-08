@@ -4,10 +4,12 @@ import os
 from dotenv import load_dotenv
 import youtube_dl
 import math
+from discord.utils import get
 from discord.ext import commands
 
 
 queue = []
+queue_looping = False
 
 load_dotenv()
 token = os.getenv("TOKEN")
@@ -93,24 +95,38 @@ class Music(commands.Cog):
 
 
 
+	# @commands.command()
+	# async def play(self, ctx, *, url):
+
+	# 	try:
+
+	# 		async with ctx.typing():
+	# 			player = await YTDLSource.from_url(url, loop=self.bot.loop, stream=True)
+	# 			ctx.voice_client.play(player, after=lambda e: print('Player error: %s' % e) if e else None)
+
+	# 		await ctx.send(f':mag_right: **Searching for** ``' + url + '``\n<:youtube:763374159567781890> **Now Playing:** ``{}'.format(player.title) + "``")
+
+	# 	except:
+
+	# 		await ctx.send("Somenthing went wrong - please try again later!")
+
 	@commands.command()
 	async def play(self, ctx, *, url):
 
+		global queue
+		global queue_looping
+
 		try:
-
-			async with ctx.typing():
-				player = await YTDLSource.from_url(url, loop=self.bot.loop, stream=True)
-				ctx.voice_client.play(player, after=lambda e: print('Player error: %s' % e) if e else None)
-
-			await ctx.send(f':mag_right: **Searching for** ``' + url + '``\n<:youtube:763374159567781890> **Now Playing:** ``{}'.format(player.title) + "``")
-
+			queue.append(url)
+			user = ctx.message.author.mention
+			await ctx.send(f'``{url}`` was added to the queue by {user}!')
 		except:
+			await ctx.send(f"Couldnt add {url} to the queue!")
 
-			await ctx.send("Somenthing went wrong - please try again later!")
+		if queue_looping:
+			return
 
-@commands.command()
-	async def play_queue(self, ctx):
-
+		queue_looping = True
 		for url in queue:
 
 			try:
@@ -128,6 +144,8 @@ class Music(commands.Cog):
 		else:
 
 			await ctx.send("Queue is now done!")
+
+			queue_looping = False
 
 	@commands.command()
 	async def pause(self, ctx):
@@ -158,7 +176,7 @@ class Music(commands.Cog):
 			await ctx.send(f'``{url}`` was added to the queue by {user}!')
 		except:
 			await ctx.send(f"Couldnt add {url} to the queue!")
-@commands.command()
+	@commands.command()
 	async def clear_queue(self, ctx):
 
 		global queue
