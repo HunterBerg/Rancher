@@ -6,13 +6,15 @@ import youtube_dl
 import math
 from discord.utils import get
 from discord.ext import commands
+from stay_alive import keep_alive
 
 
 queue = []
 queue_looping = False
 
 load_dotenv()
-token = os.getenv("TOKEN")
+token = os.environ['TOKEN']
+
 
  
 
@@ -82,7 +84,7 @@ class Music(commands.Cog):
 
 	@commands.command()
 	async def join(self, ctx, *, channel: discord.VoiceChannel):
-		"""Joins a voice channel"""
+		
 
 		if ctx.voice_client is not None:
 			return await ctx.voice_client.move_to(channel)
@@ -91,61 +93,43 @@ class Music(commands.Cog):
 			self.queue={}
 		await channel.connect()
 
-	
-
-
-
-	# @commands.command()
-	# async def play(self, ctx, *, url):
-
-	# 	try:
-
-	# 		async with ctx.typing():
-	# 			player = await YTDLSource.from_url(url, loop=self.bot.loop, stream=True)
-	# 			ctx.voice_client.play(player, after=lambda e: print('Player error: %s' % e) if e else None)
-
-	# 		await ctx.send(f':mag_right: **Searching for** ``' + url + '``\n<:youtube:763374159567781890> **Now Playing:** ``{}'.format(player.title) + "``")
-
-	# 	except:
-
-	# 		await ctx.send("Somenthing went wrong - please try again later!")
-
 	@commands.command()
 	async def play(self, ctx, *, url):
 
-		global queue
-		global queue_looping
-
 		try:
-			queue.append(url)
-			user = ctx.message.author.mention
-			await ctx.send(f'``{url}`` was added to the queue by {user}!')
+
+			async with ctx.typing():
+				player = await YTDLSource.from_url(url, loop=self.bot.loop, stream=True)
+
+				if len(self.queue) == 0:
+
+					self.start_playing(ctx.voice_client, player)
+					await ctx.send(f':mag_right: **Searching for** ``' + url + '``\n<:youtube:763374159567781890> **Now Playing:** ``{}'.format(player.title) + "``")
+
+				else:
+					
+					self.queue[len(self.queue)] = player
+					await ctx.send(f':mag_right: **Searching for** ``' + url + '``\n<:youtube:763374159567781890> **Added to queue:** ``{}'.format(player.title) + "``")
+
 		except:
-			await ctx.send(f"Couldnt add {url} to the queue!")
 
-		if queue_looping:
-			return
+			await ctx.send("Somenthing went wrong - please try again later!")
 
-		queue_looping = True
-		for url in queue:
+			
+	
 
+	def start_playing(self, voice_client, player):
+
+		self.queue[0] = player
+
+		i = 0
+		while i <  len(self.queue):
 			try:
-
-				async with ctx.typing():
-					player = await YTDLSource.from_url(url, loop=self.bot.loop, stream=True)
-					ctx.voice_client.play(player, after=lambda e: print('Player error: %s' % e) if e else None)
-
-				await ctx.send(f'<:youtube:763374159567781890> **Now Playing:** ``{url}``')
+				voice_client.play(self.queue[i], after=lambda e: print('Player error: %s' % e) if e else None)
 
 			except:
-
-				await ctx.send("Somenthing went wrong - please try again later!")
-			
-		else:
-
-			await ctx.send("Queue is now done!")
-
-			queue_looping = False
+				pass
+			i += 1
 
 	@commands.command()
 	async def pause(self, ctx):
@@ -196,7 +180,7 @@ class Music(commands.Cog):
 
 	@commands.command()
 	async def stop(self, ctx):
-		"""Stops and disconnects the bot from voice"""
+		
 		if ctx.message.author.id == 355099018113843200:
 
 			await ctx.voice_client.disconnect()
@@ -242,6 +226,7 @@ async def on_ready():
 	await Bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="Music"))
 	print('Rancher is Online')
 
+keep_alive()
 
-Bot.add_cog(Music(Bot))
+Bot.add_cog(Music(Bot)) 
 Bot.run(token)
