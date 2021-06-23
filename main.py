@@ -9,13 +9,10 @@ from discord.ext import commands
 from stay_alive import keep_alive
 
 
-queue = []
-queue_looping = False
+
 
 load_dotenv()
 token = os.environ['TOKEN']
-
-
  
 
 Bot = commands.Bot(
@@ -79,6 +76,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
 
 class Music(commands.Cog):
+
 	def __init__(self, bot):
 		self.bot = bot
 
@@ -95,41 +93,15 @@ class Music(commands.Cog):
 
 	@commands.command()
 	async def play(self, ctx, *, url):
-
 		try:
-
 			async with ctx.typing():
 				player = await YTDLSource.from_url(url, loop=self.bot.loop, stream=True)
+				ctx.voice_client.play(player, after=lambda e: print(f'Player error: {e}') if e else None)
 
-				if len(self.queue) == 0:
-
-					self.start_playing(ctx.voice_client, player)
-					await ctx.send(f':mag_right: **Searching for** ``' + url + '``\n<:youtube:763374159567781890> **Now Playing:** ``{}'.format(player.title) + "``")
-
-				else:
-					
-					self.queue[len(self.queue)] = player
-					await ctx.send(f':mag_right: **Searching for** ``' + url + '``\n<:youtube:763374159567781890> **Added to queue:** ``{}'.format(player.title) + "``")
+			await ctx.send(f'Now playing: {player.title}')
 
 		except:
-
-			await ctx.send("Somenthing went wrong - please try again later!")
-
-			
-	
-
-	def start_playing(self, voice_client, player):
-
-		self.queue[0] = player
-
-		i = 0
-		while i <  len(self.queue):
-			try:
-				voice_client.play(self.queue[i], after=lambda e: print('Player error: %s' % e) if e else None)
-
-			except:
-				pass
-			i += 1
+			await ctx.send("Something went wrong.")
 
 	@commands.command()
 	async def pause(self, ctx):
@@ -150,45 +122,8 @@ class Music(commands.Cog):
 		await ctx.send(f"Bot was resumed by {user}")
 
 	@commands.command()
-	async def add_queue(self, ctx, url):
-
-		global queue
-
-		try:
-			queue.append(url)
-			user = ctx.message.author.mention
-			await ctx.send(f'``{url}`` was added to the queue by {user}!')
-		except:
-			await ctx.send(f"Couldnt add {url} to the queue!")
-	@commands.command()
-	async def clear_queue(self, ctx):
-
-		global queue
-
-		queue.clear()
-		user = ctx.message.author.mention
-		await ctx.send(f"The queue was cleared by {user}")
-	
-	@commands.command()
-	async def view_queue(self, ctx):
-
-		if len(queue) < 1:
-			await ctx.send("The queue is empty - nothing to see here!")
-		else:
-			await ctx.send(f'Your queue is now {queue}')
-
-
-	@commands.command()
 	async def stop(self, ctx):
-		
-		if ctx.message.author.id == 355099018113843200:
-
-			await ctx.voice_client.disconnect()
-
-		else:
-			await ctx.send("this is not a command you can use")
-
-
+		await ctx.voice_client.disconnect()
 
 	@play.before_invoke
 	async def ensure_voice(self, ctx):
